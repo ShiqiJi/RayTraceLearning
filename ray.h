@@ -13,7 +13,7 @@ public:
     vector3d direction() const;
     point3d at(double t) const;
 
-public:
+private:
     point3d m_origin;
     vector3d m_direction;
 };

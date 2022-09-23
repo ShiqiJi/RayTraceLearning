@@ -4,7 +4,7 @@ ray::ray() : m_origin(point3d()), m_direction(vector3d()){}
 
 ray::ray(const point3d& origin, const vector3d& direction)
     : m_origin(origin)
-    , m_direction(direction)
+    , m_direction(identityVector(direction))
 {
 }
 

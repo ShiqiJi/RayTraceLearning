@@ -1,6 +1,6 @@
-#include "cmath"
 #include "vector3d.h"
 #include "ray.h"
+#include "sphere.h"
 
 const int imageWidth = 1920;
 const int imageHeight = 1080;
@@ -11,10 +11,7 @@ const double focalDistance = 8.0;
 
 point3d eye(0.0, 0.0, 0.0);
 
-point3d sphereCenter(0.0, 20.0, 0.0);
-double sphereRadius = 8.0;
-
-double hitSphere(const point3d&, double, const ray&);
+sphere sphere1(point3d(0.0, 20.0, 0.0), 8.0);
 
 void writeColor(std::ostream& out, color c)
 {
@@ -25,26 +22,17 @@ void writeColor(std::ostream& out, color c)
 
 color rayColor(const ray& r)
 {
-    auto hitTime = hitSphere(sphereCenter, sphereRadius, r);
-    if(hitTime > 0.0){
-        return (identityVector(r.at(hitTime) - sphereCenter) + color(1.0, 1.0, 1.0)) * 0.5;
+    hitRecord hitRecord1;
+    if(sphere1.hit(r, 0.0, 400.0, hitRecord1)){
+        return ((hitRecord1.normal + color(1.0, 1.0, 1.0)) / 2);
     }
+    // auto hitTime = hitSphere(sphereCenter, sphereRadius, r);
+    // if(hitTime > 0.0){
+    //     return (identityVector(r.at(hitTime) - sphereCenter) + color(1.0, 1.0, 1.0)) * 0.5;
+    // }
     auto unit = identityVector(r.direction());
     auto t = 0.5 * (unit.z() + 1.0);
     return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
-}
-
-double hitSphere(const point3d& center, double radius, const ray& ray)
-{
-    auto a_c = ray.origin() - center;
-    auto a = dot(ray.direction(), ray.direction());
-    auto b = 2 * dot(a_c, ray.direction());
-    auto c = dot(a_c, a_c) - radius * radius;
-    auto discriminant = b * b - 4 * a * c;
-    if(discriminant >= 0){
-        return (-b - sqrt(discriminant)) / (2 * a) ;
-    }
-    return 0.0;
 }
 
 int main(void)
