@@ -2,9 +2,9 @@
 #define SPHERE
 
 #include "vector3d.h"
-#include "entity.h"
+#include "entitycell.h"
 
-class sphere : public entity
+class sphere : public entityCell
 {
 public:
     sphere();

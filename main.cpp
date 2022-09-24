@@ -1,6 +1,7 @@
 #include "vector3d.h"
 #include "ray.h"
 #include "sphere.h"
+#include "entity.h"
 
 const int imageWidth = 1920;
 const int imageHeight = 1080;
@@ -11,7 +12,7 @@ const double focalDistance = 8.0;
 
 point3d eye(0.0, 0.0, 0.0);
 
-sphere sphere1(point3d(0.0, 20.0, 0.0), 8.0);
+entity world;
 
 void writeColor(std::ostream& out, color c)
 {
@@ -23,7 +24,7 @@ void writeColor(std::ostream& out, color c)
 color rayColor(const ray& r)
 {
     hitRecord hitRecord1;
-    if(sphere1.hit(r, 0.0, 400.0, hitRecord1)){
+    if(world.hit(r, 0.0, 400.0, hitRecord1)){
         return ((hitRecord1.normal + color(1.0, 1.0, 1.0)) / 2);
     }
     // auto hitTime = hitSphere(sphereCenter, sphereRadius, r);
@@ -40,6 +41,10 @@ int main(void)
     vector3d cameraXIdentity = identityVector(vector3d(cameraWidth, 0.0, 0.0));
     vector3d cameraYIdentity = identityVector(vector3d(0.0, 0.0, cameraHeight));
     vector3d cameraLeftDownCorner = eye + vector3d(0.0, focalDistance, 0.0) - cameraXIdentity * cameraWidth / 2 - cameraYIdentity * cameraHeight / 2;
+
+    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 0.0), 8.0));
+    world.add(std::make_shared<sphere>(point3d(0.0, 0.0, -50030.0), 50000.0));
+
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 

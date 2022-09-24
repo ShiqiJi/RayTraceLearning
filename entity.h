@@ -1,21 +1,40 @@
 #ifndef ENTITY
 #define ENTITY
 
-#include "ray.h"
+#include <memory>
+#include <vector>
+#include "entitycell.h"
 
-struct hitRecord
-{
-    point3d hitPoint;
-    vector3d hitDirection;
-    vector3d normal;
-    double t;
-};
-
-class entity
+class entity : public entityCell
 {
 public:
-    virtual ~entity() {}
-    virtual bool hit(const ray& ray, double minT, double maxT, hitRecord& result) = 0;
+    entity() {}
+    void add(std::shared_ptr<entityCell> cellPointer);
+    bool hit(const ray& ray, double minT, double maxT, hitRecord& result) override;
+
+private:
+    std::vector<std::shared_ptr<entityCell>> m_cells;
 };
+
+void entity::add(std::shared_ptr<entityCell> cellPointer)
+{
+    m_cells.push_back(cellPointer);
+};
+
+bool entity::hit(const ray& ray, double minT, double maxT, hitRecord& result)
+{
+    double minHitTime = maxT;
+    hitRecord tempRecord;
+    bool hited = false;
+
+    for (auto cell : m_cells){
+        if(cell->hit(ray, minT, minHitTime, tempRecord)){
+            minHitTime = tempRecord.t;
+            hited = true;
+        }
+    }
+    result = tempRecord;
+    return hited;
+}
 
 #endif

@@ -25,11 +25,15 @@ bool sphere::hit(const ray& ray, double minT, double maxT, hitRecord& result)
     }
     auto t = (0.0 - halfB - sqrt(halfB * halfB - a * c)) / a;
     if(t > maxT || t < minT){
-        return false;
+        auto t = (0.0 - halfB + sqrt(halfB * halfB - a * c)) / a;
+        if(t > maxT || t < minT){
+            return false;
+        }
     }
     result.hitDirection = ray.direction();
     result.hitPoint = ray.at(t);    
     result.normal = (result.hitPoint - m_center) / m_radius;
     result.t = t;
+    result.frontFace = dot(result.normal, result.hitDirection) < 0;
     return true;
 }
