@@ -1,8 +1,10 @@
+buildPath = ./build
+
 image : creatImage
 	./creatImage > image.ppm
 
-creatImage : main.cpp vector3d.h vector3d.cpp ray.h ray.cpp entity.h sphere.h sphere.cpp
-	g++ main.cpp vector3d.cpp ray.cpp sphere.cpp -o creatImage
+creatImage : main.cpp vector3d.h ray.h entity.h sphere.h camera.h entitycell.h
+	g++ main.cpp -o ./creatImage
 
-clean :
+clear :
 	rm creatImage *.ppm

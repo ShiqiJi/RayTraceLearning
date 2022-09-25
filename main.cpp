@@ -1,14 +1,12 @@
+
+#include <random>
 #include "vector3d.h"
 #include "ray.h"
 #include "sphere.h"
 #include "entity.h"
+#include "camera.h"
 
-const int imageWidth = 1920;
-const int imageHeight = 1080;
-
-const double cameraWidth = 19.2;
-const double cameraHeight = 10.8;
-const double focalDistance = 8.0;
+camera camera0;
 
 point3d eye(0.0, 0.0, 0.0);
 
@@ -21,16 +19,18 @@ void writeColor(std::ostream& out, color c)
         << static_cast<int>(255.99 * c.z()) << '\n';
 }
 
-color rayColor(const ray& r)
+color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)
 {
     hitRecord hitRecord1;
-    if(world.hit(r, 0.0, 400.0, hitRecord1)){
-        return ((hitRecord1.normal + color(1.0, 1.0, 1.0)) / 2);
+    
+    if(--reflectMaxTimes < 0){
+        return color(0.0, 0.0, 0.0);
     }
-    // auto hitTime = hitSphere(sphereCenter, sphereRadius, r);
-    // if(hitTime > 0.0){
-    //     return (identityVector(r.at(hitTime) - sphereCenter) + color(1.0, 1.0, 1.0)) * 0.5;
-    // }
+    
+    if(entity.hit(r, 0.1, 10000.0, hitRecord1)){
+        return 0.5 * rayColor(ray(hitRecord1.hitPoint, vector3d::randomIdentity() + hitRecord1.normal), entity, reflectMaxTimes);
+    }
+
     auto unit = identityVector(r.direction());
     auto t = 0.5 * (unit.z() + 1.0);
     return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
@@ -38,23 +38,18 @@ color rayColor(const ray& r)
 
 int main(void)
 {
-    vector3d cameraXIdentity = identityVector(vector3d(cameraWidth, 0.0, 0.0));
-    vector3d cameraYIdentity = identityVector(vector3d(0.0, 0.0, cameraHeight));
-    vector3d cameraLeftDownCorner = eye + vector3d(0.0, focalDistance, 0.0) - cameraXIdentity * cameraWidth / 2 - cameraYIdentity * cameraHeight / 2;
-
     world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 0.0), 8.0));
-    world.add(std::make_shared<sphere>(point3d(0.0, 0.0, -50030.0), 50000.0));
-
+    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, -10008.0), 10000.0));
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
     for(int j = imageHeight - 1; j >= 0; j--){
         for(int i = 0; i < imageWidth; i++){
-            auto r = ray(eye, cameraLeftDownCorner 
-            + (cameraHeight / static_cast<double>(imageHeight) * static_cast<double>(j) * cameraYIdentity) 
-            + (cameraWidth / static_cast<double>(imageWidth) * static_cast<double>(i) * cameraXIdentity) - eye);
-            writeColor(std::cout, rayColor(r));
+            color colorSum;
+            for (int mixTime = 0; mixTime < maxColorMixTimes; mixTime++) {
+                colorSum += rayColor(camera0.getRay(i, j), world, 50);
+            }
+            writeColor(std::cout, colorSum / maxColorMixTimes);
         }
     }
-
 } 

@@ -1,5 +1,4 @@
-#ifndef ENTITYCELL
-#define ENTITYCELL
+#pragma once
 
 #include "ray.h"
 
@@ -22,7 +21,5 @@ class entityCell
 {
 public:
     virtual ~entityCell() {}
-    virtual bool hit(const ray& ray, double minT, double maxT, hitRecord& result) = 0;
+    virtual bool hit(const ray& ray, double minT, double maxT, hitRecord& result) const = 0;
 };
-
-#endif

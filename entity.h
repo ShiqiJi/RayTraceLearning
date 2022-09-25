@@ -1,5 +1,4 @@
-#ifndef ENTITY
-#define ENTITY
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -10,7 +9,7 @@ class entity : public entityCell
 public:
     entity() {}
     void add(std::shared_ptr<entityCell> cellPointer);
-    bool hit(const ray& ray, double minT, double maxT, hitRecord& result) override;
+    bool hit(const ray& ray, double minT, double maxT, hitRecord& result) const override;
 
 private:
     std::vector<std::shared_ptr<entityCell>> m_cells;
@@ -21,7 +20,7 @@ void entity::add(std::shared_ptr<entityCell> cellPointer)
     m_cells.push_back(cellPointer);
 };
 
-bool entity::hit(const ray& ray, double minT, double maxT, hitRecord& result)
+bool entity::hit(const ray& ray, double minT, double maxT, hitRecord& result) const
 {
     double minHitTime = maxT;
     hitRecord tempRecord;
@@ -36,5 +35,3 @@ bool entity::hit(const ray& ray, double minT, double maxT, hitRecord& result)
     result = tempRecord;
     return hited;
 }
-
-#endif
