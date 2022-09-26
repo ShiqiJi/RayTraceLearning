@@ -1,5 +1,4 @@
-#ifndef RAY_H
-#define RAY_H
+#pragma once
 
 #include "vector3d.h"
 
@@ -40,5 +39,3 @@ point3d ray::at(double t) const
 {
     return m_origin + (m_direction * t);
 }
-
-#endif

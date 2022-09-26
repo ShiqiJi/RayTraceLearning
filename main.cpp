@@ -1,22 +1,10 @@
-
-#include <random>
-#include "vector3d.h"
-#include "ray.h"
-#include "sphere.h"
-#include "entity.h"
-#include "camera.h"
-
-camera camera0;
-
-point3d eye(0.0, 0.0, 0.0);
-
-entity world;
+#include "head.h"
 
 void writeColor(std::ostream& out, color c)
 {
-    out << static_cast<int>(255.99 * c.x()) << ' '
-        << static_cast<int>(255.99 * c.y()) << ' '
-        << static_cast<int>(255.99 * c.z()) << '\n';
+    out << static_cast<int>(256 * sqrt(limitValue(c.x(), 0.0, 0.999))) << ' '
+        << static_cast<int>(256 * sqrt(limitValue(c.y(), 0.0, 0.999))) << ' '
+        << static_cast<int>(256 * sqrt(limitValue(c.z(), 0.0, 0.999))) << '\n';
 }
 
 color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)

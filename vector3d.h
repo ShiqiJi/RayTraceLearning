@@ -1,18 +1,7 @@
 # pragma once
 
 #include <iostream>
-#include <cmath>
-
-double randomDouble()
-{
-    return rand() / (RAND_MAX + 1.0);
-}
-
-double randomDouble(double min, double max)
-{
-    return randomDouble() * (max -min) + min;
-}
-
+#include "utility.h"
 class vector3d
 {
 public:
