@@ -8,7 +8,7 @@ class sphere : public entityCell
 {
 public:
     sphere();
-    sphere(const point3d& center, double radius);
+    sphere(const point3d& center, double radius, std::shared_ptr<material> material);
     ~sphere();
 
     bool hit(const ray& ray, double minT, double maxT, hitRecord& result) const override;
@@ -16,13 +16,15 @@ public:
 private:
     point3d m_center;
     double m_radius;
+    std::shared_ptr<material> m_material;
 };
 
 sphere::sphere() : m_center(point3d()), m_radius(0.0) {}
 
-sphere::sphere(const point3d& center, double radius)
+sphere::sphere(const point3d& center, double radius, std::shared_ptr<material> material)
     : m_center(center)
     , m_radius(radius)
+    , m_material(material)
 {
 }
 
@@ -52,5 +54,6 @@ bool sphere::hit(const ray& ray, double minT, double maxT, hitRecord& result) co
     result.normal = (result.hitPoint - m_center) / m_radius;
     result.t = t;
     result.frontFace = dot(result.normal, result.hitDirection) < 0;
+    result.materialPtr = m_material;
     return true;
 }

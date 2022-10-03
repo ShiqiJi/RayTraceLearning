@@ -7,7 +7,9 @@ class vector3d
 public:
     inline static vector3d random();
     inline static vector3d random(double min, double max);
-    inline static vector3d randomIdentity();
+    inline static vector3d randomInUnitSphere();
+    inline static vector3d randomUnitVector();
+    inline static bool isNullVector(const vector3d& v);
 
 public:
     vector3d();
@@ -46,7 +48,7 @@ vector3d vector3d::random(double min, double max)
     return vector3d(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
 }
 
-vector3d vector3d::randomIdentity()
+vector3d vector3d::randomInUnitSphere()
 {
     while(true){
         auto v = random(-1, 1);
@@ -54,6 +56,11 @@ vector3d vector3d::randomIdentity()
             return v;
         }
     }
+}
+
+bool vector3d::isNullVector(const vector3d& v)
+{
+    return v.length() <  1e-8;
 }
 
 vector3d::vector3d()
@@ -192,4 +199,9 @@ inline vector3d cross (const vector3d& v1, const vector3d& v2)
 inline vector3d identityVector(const vector3d& v)
 {
     return v / v.length();
+}
+
+vector3d vector3d::randomUnitVector()
+{
+    return identityVector(randomInUnitSphere());
 }

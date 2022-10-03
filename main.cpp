@@ -1,4 +1,17 @@
-#include "head.h"
+#include <limits>
+#include "vector3d.h"
+#include "ray.h"
+#include "sphere.h"
+#include "entity.h"
+#include "camera.h"
+#include "metal.h"
+#include "lambertian.h"
+
+camera camera0;
+
+point3d eye(0.0, 0.0, 0.0);
+
+entity world;
 
 void writeColor(std::ostream& out, color c)
 {
@@ -15,8 +28,11 @@ color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)
         return color(0.0, 0.0, 0.0);
     }
     
-    if(entity.hit(r, 0.1, 10000.0, hitRecord1)){
-        return 0.5 * rayColor(ray(hitRecord1.hitPoint, vector3d::randomIdentity() + hitRecord1.normal), entity, reflectMaxTimes);
+    if(entity.hit(r, 0.1, std::numeric_limits<double>::infinity(), hitRecord1)){
+        color attenuation;
+        ray scatterRay;
+        hitRecord1.materialPtr->scatter(hitRecord1, attenuation, scatterRay);
+        return attenuation * rayColor(scatterRay, entity, reflectMaxTimes);
     }
 
     auto unit = identityVector(r.direction());
@@ -26,8 +42,10 @@ color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)
 
 int main(void)
 {
-    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 0.0), 8.0));
-    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, -10008.0), 10000.0));
+    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 0.0), 8.0, std::make_shared<lambertain>(color(0.7, 0.3, 0.3))));
+    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, -10008.0), 10000.0, std::make_shared<lambertain>(color(0.8, 0.8, 0.0))));
+    world.add(std::make_shared<sphere>(point3d(20.0, 20.0, 0.0), 8.0, std::make_shared<metal>(color(0.8, 0.8, 0.8), 4)));
+    world.add(std::make_shared<sphere>(point3d(-20.0, 20.0, 0.0), 8.0, std::make_shared<metal>(color(0.8, 0.6, 0.2), 64)));
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
@@ -35,7 +53,7 @@ int main(void)
         for(int i = 0; i < imageWidth; i++){
             color colorSum;
             for (int mixTime = 0; mixTime < maxColorMixTimes; mixTime++) {
-                colorSum += rayColor(camera0.getRay(i, j), world, 50);
+                colorSum += rayColor(camera0.getRay(i, j), world, 32);
             }
             writeColor(std::cout, colorSum / maxColorMixTimes);
         }
