@@ -27,7 +27,6 @@ bool lambertain::scatter(const hitRecord& record, color& attenuation, ray& scett
     auto direction = record.normal + identityVector(vector3d::randomInUnitSphere());
     if(vector3d::isNullVector(direction)){
         direction = record.normal;
-        std::cerr << "null normal" << std::endl;
     }
     scetterRay = ray(record.hitPoint, direction);
     attenuation = m_albedo;

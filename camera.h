@@ -4,8 +4,8 @@
 #include "vector3d.h"
 #include "ray.h"
 
-const int imageWidth = 960;
-const int imageHeight = 540;
+const int imageWidth = 480;
+const int imageHeight = 270;
 
 const int maxColorMixTimes = 32;
 
@@ -26,7 +26,7 @@ private:
 
 camera::camera()
     : m_origin(point3d())
-    , m_bottomLeft(point3d(-4.8, 4.0, -2.7))
+    , m_bottomLeft(point3d(-(imageWidth / 200.0), 1.2, -(imageHeight / 200.0)))
     , m_horizontalIdentity(vector3d(0.01, 0.0, 0.0))
     , m_verticalIdentity(vector3d(0.0, 0.0, 0.01))
 {
@@ -38,9 +38,10 @@ ray camera::getRay(int u, int v)
     if(v < 0.0) v = 0.0;
     if(u > imageWidth) u = imageWidth;
     if(v > imageHeight) v = imageHeight;
-    return ray(m_origin, m_bottomLeft 
+    auto direction = m_bottomLeft 
     + ((u + randomDouble(-0.5, 0.5)) * m_horizontalIdentity) 
-    + ((v + randomDouble(-0.5, 0.5)) * m_verticalIdentity) - m_origin);
+    + ((v + randomDouble(-0.5, 0.5)) * m_verticalIdentity) - m_origin;
+    return ray(m_origin, identityVector(direction));
 }
 
 std::vector<ray> camera::getRay()

@@ -42,9 +42,10 @@ bool sphere::hit(const ray& ray, double minT, double maxT, hitRecord& result) co
     if(discriminant < 0){
         return false;
     }
-    auto t = (0.0 - halfB - sqrt(halfB * halfB - a * c)) / a;
+    auto temp = sqrt(halfB * halfB - a * c);
+    auto t = (-halfB - temp) / a;
     if(t > maxT || t < minT){
-        auto t = (0.0 - halfB + sqrt(halfB * halfB - a * c)) / a;
+        auto t = (-halfB + temp) / a;
         if(t > maxT || t < minT){
             return false;
         }

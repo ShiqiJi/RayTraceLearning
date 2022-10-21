@@ -23,6 +23,27 @@ struct hitRecord
     {
         return hitDirection - 2 * dot(hitDirection, normal) * normal;
     }
+
+    vector3d refract(double inputIndex, double outputIndex, double tatalReflactSin) const
+    {
+        return hitDirection;
+        if(fabs(inputIndex - outputIndex) < 0.01){
+            return hitDirection;
+        }
+        auto refractIndex = inputIndex / outputIndex;
+        auto identityDirection = identityVector(hitDirection);
+        auto sin_vector = dot(-identityDirection, normal) * normal + identityDirection;
+        auto refract_sin_vector = sin_vector * refractIndex;
+        auto refract_sin = refract_sin_vector.lengthSquared();
+        if(inputIndex < outputIndex) {
+            return refract_sin_vector - sqrt(fabs(1 - refract_sin)) * normal;
+        } else {
+            if(refract_sin > pow(tatalReflactSin, 2)){
+                return reflect();
+            }
+            return refract_sin_vector + sqrt(fabs(1 - refract_sin)) * normal;
+        }
+    }
 };
 
 class entityCell

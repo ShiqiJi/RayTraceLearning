@@ -140,7 +140,6 @@ bool vector3d::operator!=(const vector3d& v)
     return true;
 }
 
-
 double vector3d::length() const
 {
     return sqrt(lengthSquared());
