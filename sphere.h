@@ -34,18 +34,18 @@ sphere::~sphere()
 
 bool sphere::hit(const ray& ray, double minT, double maxT, hitRecord& result) const
 {
-    auto a_c = ray.origin() - m_center;
+    auto A_C = ray.origin() - m_center;
     auto a = dot(ray.direction(), ray.direction());
-    auto halfB = dot(a_c, ray.direction());
-    auto c = dot(a_c, a_c) - m_radius * m_radius;
-    auto discriminant = halfB * halfB - a * c;
-    if(discriminant < 0){
+    auto h = dot(A_C, ray.direction());
+    auto c = dot(A_C, A_C) - m_radius * m_radius;
+    auto h2_ac = h * h - a * c;
+    if(h2_ac < 0){
         return false;
     }
-    auto temp = sqrt(halfB * halfB - a * c);
-    auto t = (-halfB - temp) / a;
+    auto sh2_ac = sqrt(h2_ac);
+    auto t = (-h - sh2_ac) / a;
     if(t > maxT || t < minT){
-        auto t = (-halfB + temp) / a;
+        t = (-h + sh2_ac) / a;
         if(t > maxT || t < minT){
             return false;
         }
@@ -55,6 +55,9 @@ bool sphere::hit(const ray& ray, double minT, double maxT, hitRecord& result) co
     result.normal = (result.hitPoint - m_center) / m_radius;
     result.t = t;
     result.frontFace = dot(result.normal, result.hitDirection) < 0;
+    if(!result.frontFace){
+        result.normal = -result.normal;
+    }
     result.materialPtr = m_material;
     return true;
 }

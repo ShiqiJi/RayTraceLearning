@@ -26,7 +26,6 @@ color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)
     hitRecord hitRecord1;
     
     if(--reflectMaxTimes < 0){
-        //std::cerr << "black" << std::endl; 
         return color(0.0, 0.0, 0.0);
     }
     
@@ -44,10 +43,10 @@ color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)
 
 int main(void)
 {
-    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 0.0), 8.0, std::make_shared<lambertain>(color(0.7, 0.3, 0.3))));
+    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 0.0), 6.0, std::make_shared<lambertain>(color(0.7, 0.3, 0.3))));
     world.add(std::make_shared<sphere>(point3d(0.0, 20.0, -10008.0), 10000.0, std::make_shared<lambertain>(color(0.8, 0.8, 0.0))));
-    world.add(std::make_shared<sphere>(point3d(20.0, 20.0, 0.0), 8.0, std::make_shared<metal>(color(0.8, 0.8, 0.8), 32)));
-    world.add(std::make_shared<sphere>(point3d(-20.0, 20.0, 0.0), 8.0, std::make_shared<dielectric>(color(0.9, 0.9, 0.9), 1.4, 0.8)));
+    world.add(std::make_shared<sphere>(point3d(20.0, 20.0, 0.0), 7.0, std::make_shared<metal>(color(0.8, 0.8, 0.8), 32)));
+    world.add(std::make_shared<sphere>(point3d(-20.0, 20.0, 0.0), 8.0, std::make_shared<dielectric>(color(0.9, 0.9, 0.9), 1.0, 0.99)));
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
