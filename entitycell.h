@@ -39,10 +39,9 @@ struct hitRecord
             return refract_sin_vector - sqrt(fabs(1 - refract_sin)) * identityNormal;
         } else {
             if(refract_sin > pow(tatalReflactSin, 2)){
-                std::cerr << "tatal reflact\n";
                 return reflect();
             }
-            return refract_sin_vector + sqrt(fabs(1 - refract_sin)) * identityNormal;
+            return refract_sin_vector - sqrt(fabs(1 - refract_sin)) * identityNormal;
         }
     }
 };

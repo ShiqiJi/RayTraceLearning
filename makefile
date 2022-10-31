@@ -1,15 +1,15 @@
-buildPath = ./build
+headfiles = ./*.h
 
 image : creatImage
 	./creatImage 1>image.ppm 2>log
 
-creatImage : main.cpp vector3d.h ray.h entity.h sphere.h camera.h entitycell.h
+creatImage : main.cpp $(headfiles)
 	g++ main.cpp -o creatImage
 
 test : unitTest
-	./unitTest 2>&1 1>testLog
+	./unitTest >>testLog 2>&1
 
-unitTest : test.cpp
+unitTest : test.cpp $(headfiles)
 	g++ test.cpp -o unitTest
 
 clear :
