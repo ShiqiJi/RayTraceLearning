@@ -24,7 +24,7 @@ struct hitRecord
         return hitDirection - 2 * dot(hitDirection, normal) * normal;
     }
 
-    vector3d refract(double inputIndex, double outputIndex, double tatalReflactSin) const
+    vector3d refract(double inputIndex, double outputIndex) const
     {
         if(fabs(inputIndex - outputIndex) < 0.001){
             return hitDirection;
@@ -32,17 +32,16 @@ struct hitRecord
         auto refractIndex = inputIndex / outputIndex;
         auto identityDirection = identityVector(hitDirection);
         auto identityNormal = identityVector(normal);
-        auto sin_vector = dot(-identityDirection, identityNormal) * identityNormal + identityDirection;
+        auto cos_theta = dot(-identityDirection, identityNormal);
+        auto sin_vector = cos_theta * identityNormal + identityDirection;
         auto refract_sin_vector = sin_vector * refractIndex;
         auto refract_sin = refract_sin_vector.lengthSquared();
-        if(inputIndex < outputIndex) {
-            return refract_sin_vector - sqrt(fabs(1 - refract_sin)) * identityNormal;
-        } else {
-            if(refract_sin > pow(tatalReflactSin, 2)){
-                return reflect();
-            }
-            return refract_sin_vector - sqrt(fabs(1 - refract_sin)) * identityNormal;
+        auto R0 = pow((inputIndex - outputIndex) / (inputIndex + outputIndex), 2);
+        auto R_theta = R0 + (1 - R0) * pow((1-cos_theta), 5);
+        if(refract_sin > 1.0 || R_theta > randomDouble()){
+            return reflect();
         }
+        return refract_sin_vector - sqrt(fabs(1 - refract_sin)) * identityNormal;
     }
 };
 
