@@ -4,40 +4,72 @@
 #include "vector3d.h"
 #include "ray.h"
 
-const int imageWidth = 960;
-const int imageHeight = 540;
-
-const int maxColorMixTimes = 32;
-
 class camera
 {
 public:
     camera();
+    camera(point3d origin = point3d()
+    , point3d lookAt = point3d(0.0, 1.0, 0.0)
+    , double focus = 4.0
+    , int width = 1920
+    , int height = 1080);
+
+    int width();
+    int height();
 
     ray getRay(int u, int v); //u: horizontal position v:vertical position
     std::vector<ray> getRay();  
 
 private:
+    vector3d randomVectorInUnitDisk();
+
     point3d m_origin;
     point3d m_bottomLeft;
     vector3d m_horizontalIdentity;
     vector3d m_verticalIdentity;
+    int m_width;
+    int m_height;
 };
 
-camera::camera()
-    : m_origin(point3d())
-    , m_bottomLeft(point3d(-(imageWidth / 200.0), 2.0, -(imageHeight / 200.0)))
-    , m_horizontalIdentity(vector3d(0.01, 0.0, 0.0))
-    , m_verticalIdentity(vector3d(0.0, 0.0, 0.01))
+camera::camera(point3d origin, point3d lookAt, double focus, int width, int height)
+    : m_origin(origin)
+    , m_width(width)
+    , m_height(height)
 {
+    vector3d tempH;
+    auto direction = lookAt - origin;
+    if(direction.x() == 0.0){
+        tempH = vector3d(1, 0, 0);
+    } else {
+        tempH = vector3d(-direction.y()/direction.x(), 1, 0);
+    }
+    if(cross(tempH, vector3d(direction.x(), direction.y(), 0)).z() > 0){
+        tempH = -tempH;
+    }
+    auto tempV = cross(direction, tempH);
+    m_bottomLeft = origin + focus * identityVector(direction) + m_width / 200.0 * identityVector(tempH) - m_height / 200.0 * identityVector(tempV);
+    m_horizontalIdentity = -identityVector(tempH) / 100.0;
+    m_verticalIdentity = identityVector(tempV) / 100.0;
+}
+
+int camera::width()
+{
+    return m_width;
+}
+
+int camera::height()
+{
+    return m_height;
 }
 
 ray camera::getRay(int u, int v)
 {
     if(u < 0.0) u = 0.0;
     if(v < 0.0) v = 0.0;
-    if(u > imageWidth) u = imageWidth;
-    if(v > imageHeight) v = imageHeight;
+    if(u > m_width) u = m_width;
+    if(v > m_height) v = m_height;
+    auto cameraSensor = randomVectorInUnitDisk();
+    auto offset = m_horizontalIdentity * cameraSensor.x() * m_width / 200.0 + m_verticalIdentity * cameraSensor.z() * m_height / 200.0;
     auto direction = m_bottomLeft 
     + ((u + randomDouble(-0.5, 0.5)) * m_horizontalIdentity) 
     + ((v + randomDouble(-0.5, 0.5)) * m_verticalIdentity) - m_origin;
@@ -47,10 +79,19 @@ ray camera::getRay(int u, int v)
 std::vector<ray> camera::getRay()
 {
     std::vector<ray> rayCollection;
-    for(int j = imageHeight - 1; j >= 0; j--){
-        for(int i = 0; i < imageWidth; i++){
+    for(int j = m_height - 1; j >= 0; j--){
+        for(int i = 0; i < m_width; i++){
             rayCollection.push_back(getRay((double)i, (double)j));
         }
     }
     return rayCollection;
+}
+
+vector3d camera::randomVectorInUnitDisk()
+{
+    while(true){
+        auto v = vector3d(randomDouble(-1.0, 1.0), 0.0, randomDouble(-1.0, 1.0));
+        if(v.lengthSquared() > 1.0) continue;
+        return v;
+    }
 }

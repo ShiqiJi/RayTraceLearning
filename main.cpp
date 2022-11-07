@@ -1,4 +1,8 @@
 #include <limits>
+#include <mutex>
+#include <memory>
+#include <vector>
+#include <thread>
 #include "vector3d.h"
 #include "ray.h"
 #include "sphere.h"
@@ -8,10 +12,11 @@
 #include "lambertian.h"
 #include "dielectric.h"
 
-camera camera0;
-
-point3d eye(0.0, 0.0, 0.0);
-
+camera camera0(point3d(0.0, 0.0, 100.0), vector3d(0.0, 20.0, 8.0), 4.0, 480, 270);
+camera camera1(point3d(0.0, 0.0, 4.0), vector3d(0.0, 20.0, 8.0), 1.0, 480, 270);
+camera camera3(point3d(60.0, -20.0, 10.0), vector3d(0.0, 20.0, 8.0), 5.0, 480, 270);
+camera camera4(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 80.0, 7680, 4320);
+#define CAMERA camera4
 entity world;
 
 void writeColor(std::ostream& out, color c)
@@ -41,22 +46,82 @@ color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)
     return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
 }
 
+void generateWorld()
+{
+    world.add(std::make_shared<sphere>(point3d(0.0, 0.0, -320000.0), 320000.0, std::make_shared<lambertain>(color(0.8, 0.8, 0.0))));
+    world.add(std::make_shared<sphere>(point3d(-20.0, 20.0, 8.0), 8.0, std::make_shared<lambertain>(color(0.7, 0.3, 0.3))));
+    world.add(std::make_shared<sphere>(point3d(20.0, 20.0, 8.0), 8.0, std::make_shared<metal>(color(0.8, 0.8, 0.8), 128)));
+    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 8.0), 8.0, std::make_shared<dielectric>(color(0.9, 0.9, 0.9), 1.25)));
+
+    for(int i = -16; i < 16; i++){
+        for(int j = -16; j < 16; j++){
+            auto ramdom = randomDouble(0.0, 1.0);
+            auto radius = randomDouble(2.0, 3.0);
+            auto center = point3d(i * 8.0 + randomDouble(-1.0, 1.0), j * 8.0 + randomDouble(-1.0, 1.0), radius);
+            if(center.x() < 34.0 && center.x() > -34.0 && center.y() < 26.0 && center.y() > 14.0) continue;
+            auto col = color(randomDouble(0.0, 1.0), randomDouble(0.0, 1.0), randomDouble(0.0, 1.0));
+
+            if(ramdom > 0.92){
+                world.add(std::make_shared<sphere>(center, radius, std::make_shared<lambertain>(col)));
+            } else if(ramdom > 0.84) {
+                world.add(std::make_shared<sphere>(center, radius, std::make_shared<metal>(col, randomDouble(16.0, 128.0))));
+            } else if(ramdom > 0.76){
+                world.add(std::make_shared<sphere>(center, radius, std::make_shared<dielectric>(col, randomDouble(1.01, 1.6))));
+            }
+        }
+    }
+
+}
+
 int main(void)
 {
-    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 0.0), 8.0, std::make_shared<lambertain>(color(0.7, 0.3, 0.3))));
-    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, -10008.0), 10000.0, std::make_shared<lambertain>(color(0.8, 0.8, 0.0))));
-    world.add(std::make_shared<sphere>(point3d(20.0, 20.0, 0.0), 8.0, std::make_shared<metal>(color(0.8, 0.8, 0.8), 32)));
-    world.add(std::make_shared<sphere>(point3d(-20.0, 20.0, 0.0), 8.0, std::make_shared<dielectric>(color(0.9, 0.9, 0.9), 1.25)));
+    generateWorld();
 
-    std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
+    std::vector<std::vector<color>> pixMap(CAMERA.height());
+    std::mutex pixMutex;
+    int row = 0;
+    std::mutex mutex;
 
-    for(int j = imageHeight - 1; j >= 0; j--){
-        for(int i = 0; i < imageWidth; i++){
-            color colorSum;
-            for (int mixTime = 0; mixTime < maxColorMixTimes; mixTime++) {
-                colorSum += rayColor(camera0.getRay(i, j), world, 32);
+    auto funciton = [&](){
+        while(true){
+            mutex.lock();
+            if(row == CAMERA.height()) {
+                mutex.unlock();
+                return;
             }
-            writeColor(std::cout, colorSum / maxColorMixTimes);
+            auto currentRow = row;
+            row++;
+            mutex.unlock();
+            std::vector<color> currentRowPix(CAMERA.width());
+            for(int i = 0; i < CAMERA.width(); i++){
+                color colorSum;
+                for (int mixTime = 0; mixTime < 32; mixTime++) {
+                    colorSum += rayColor(CAMERA.getRay(i, currentRow), world, 32);
+                }
+                currentRowPix[i] = colorSum / 32;
+            }
+            std::cerr << "finish row" << currentRow << "\n";
+            pixMutex.lock();
+            pixMap[currentRow] = currentRowPix;
+            pixMutex.unlock();
+        }
+    };
+
+    std::thread threads[8];
+    for(int i = 0; i < 8; i++){
+        threads[i] = std::thread(funciton);
+    }
+    for(auto &t : threads){
+        t.join();
+    }
+
+    std::cerr << "generate finish";
+
+    std::cout << "P3\n" << CAMERA.width() << ' ' << CAMERA.height() << "\n255\n";
+
+    for(int j = CAMERA.height() - 1; j >= 0; j--){
+        for(auto &pix : pixMap[j]){
+            writeColor(std::cout, pix);
         }
     }
 } 
