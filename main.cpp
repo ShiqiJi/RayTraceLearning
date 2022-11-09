@@ -13,10 +13,10 @@
 #include "dielectric.h"
 
 camera camera0(point3d(0.0, 0.0, 100.0), vector3d(0.0, 20.0, 8.0), 4.0, 480, 270);
-camera camera1(point3d(0.0, 0.0, 4.0), vector3d(0.0, 20.0, 8.0), 1.0, 480, 270);
-camera camera3(point3d(60.0, -20.0, 10.0), vector3d(0.0, 20.0, 8.0), 5.0, 480, 270);
-camera camera4(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 80.0, 7680, 4320);
-#define CAMERA camera4
+camera camera1(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 5.0, 480, 270);
+camera camera3(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 20.0, 1920, 1200);
+camera camera4(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 40.0, 3840, 2160);
+#define CAMERA camera3
 entity world;
 
 void writeColor(std::ostream& out, color c)
