@@ -28,6 +28,6 @@ metal::metal(const color& albedo, double fuzz)
 bool metal::scatter(const hitRecord& record, color& attenuation, ray& scetterRay) const
 {
     attenuation = m_albedo;
-    scetterRay = ray(record.hitPoint, identityVector(record.reflect()) * m_fuzz + vector3d::randomInUnitSphere());
+    scetterRay = ray(record.hitPoint, identityVector(record.reflect()) * m_fuzz + vector3d::randomInUnitSphere(), record.time);
     return true;
 }

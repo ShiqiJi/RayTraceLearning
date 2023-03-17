@@ -12,11 +12,14 @@
 #include "lambertian.h"
 #include "dielectric.h"
 
-camera camera0(point3d(0.0, 0.0, 100.0), vector3d(0.0, 20.0, 8.0), 4.0, 480, 270);
-camera camera1(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 5.0, 480, 270);
-camera camera3(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 20.0, 1920, 1200);
-camera camera4(point3d(50.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 40.0, 3840, 2160);
-#define CAMERA camera3
+#define STARTTIME 0.0
+#define ENDTIME 1.0
+
+camera camera0(point3d(0.0, 0.0, 100.0), vector3d(0.0, 20.0, 8.0), 4.0, 480, 270, STARTTIME, ENDTIME);
+camera camera1(point3d(80.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 5.0, 480, 270, STARTTIME, ENDTIME);
+camera camera3(point3d(80.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 20.0, 1920, 1200, STARTTIME, ENDTIME);
+camera camera4(point3d(80.0, -10.0, 10.0), vector3d(0.0, 20.0, 8.0), 40.0, 3840, 2160, STARTTIME, ENDTIME);
+#define CAMERA camera1
 entity world;
 
 void writeColor(std::ostream& out, color c)
@@ -48,25 +51,25 @@ color rayColor(const ray& r, const entityCell& entity, int reflectMaxTimes)
 
 void generateWorld()
 {
-    world.add(std::make_shared<sphere>(point3d(0.0, 0.0, -320000.0), 320000.0, std::make_shared<lambertain>(color(0.8, 0.8, 0.0))));
-    world.add(std::make_shared<sphere>(point3d(-20.0, 20.0, 8.0), 8.0, std::make_shared<lambertain>(color(0.7, 0.3, 0.3))));
-    world.add(std::make_shared<sphere>(point3d(20.0, 20.0, 8.0), 8.0, std::make_shared<metal>(color(0.8, 0.8, 0.8), 128)));
-    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 8.0), 8.0, std::make_shared<dielectric>(color(0.9, 0.9, 0.9), 1.25)));
+    world.add(std::make_shared<sphere>(point3d(0.0, 0.0, -320000.0), point3d(0.0, 0.0, -320000.0), 320000.0, std::make_shared<lambertain>(color(0.5, 0.5, 0.5)), STARTTIME, ENDTIME));
+    world.add(std::make_shared<sphere>(point3d(-20.0, 20.0, 8.0), point3d(-20.0, 20.0, 8.0), 8.0, std::make_shared<lambertain>(color(0.7, 0.3, 0.3)), STARTTIME, ENDTIME));
+    world.add(std::make_shared<sphere>(point3d(20.0, 20.0, 8.0), point3d(20.0, 20.0, 8.0), 8.0, std::make_shared<metal>(color(0.8, 0.8, 0.8), 128), STARTTIME, ENDTIME));
+    world.add(std::make_shared<sphere>(point3d(0.0, 20.0, 8.0), point3d(0.0, 20.0, 8.0), 8.0, std::make_shared<dielectric>(color(0.9, 0.9, 0.9), 1.25), STARTTIME, ENDTIME));
 
     for(int i = -16; i < 16; i++){
         for(int j = -16; j < 16; j++){
             auto ramdom = randomDouble(0.0, 1.0);
-            auto radius = randomDouble(2.0, 3.0);
+            auto radius = randomDouble(3.0, 4.0);
             auto center = point3d(i * 8.0 + randomDouble(-1.0, 1.0), j * 8.0 + randomDouble(-1.0, 1.0), radius);
             if(center.x() < 34.0 && center.x() > -34.0 && center.y() < 26.0 && center.y() > 14.0) continue;
             auto col = color(randomDouble(0.0, 1.0), randomDouble(0.0, 1.0), randomDouble(0.0, 1.0));
-
+            auto startCenter = center + point3d(0.0, 0.0, randomDouble(0.0, 2.0));
             if(ramdom > 0.92){
-                world.add(std::make_shared<sphere>(center, radius, std::make_shared<lambertain>(col)));
+                world.add(std::make_shared<sphere>(startCenter, center, radius, std::make_shared<lambertain>(col), STARTTIME, ENDTIME));
             } else if(ramdom > 0.84) {
-                world.add(std::make_shared<sphere>(center, radius, std::make_shared<metal>(col, randomDouble(16.0, 128.0))));
+                world.add(std::make_shared<sphere>(startCenter, center, radius, std::make_shared<metal>(col, randomDouble(16.0, 128.0)), STARTTIME, ENDTIME));
             } else if(ramdom > 0.76){
-                world.add(std::make_shared<sphere>(center, radius, std::make_shared<dielectric>(col, randomDouble(1.01, 1.6))));
+                world.add(std::make_shared<sphere>(startCenter, center, radius, std::make_shared<dielectric>(col, randomDouble(1.01, 1.6)), STARTTIME, ENDTIME));
             }
         }
     }

@@ -12,7 +12,9 @@ public:
     , point3d lookAt = point3d(0.0, 1.0, 0.0)
     , double focus = 4.0
     , int width = 1920
-    , int height = 1080);
+    , int height = 1080
+    , double timeMin = 0.0
+    , double timeMax = 1.0);
 
     int width();
     int height();
@@ -29,12 +31,16 @@ private:
     vector3d m_verticalIdentity;
     int m_width;
     int m_height;
+    double m_timeMin;
+    double m_timeMax;
 };
 
-camera::camera(point3d origin, point3d lookAt, double focus, int width, int height)
+camera::camera(point3d origin, point3d lookAt, double focus, int width, int height, double timeMin, double timeMax)
     : m_origin(origin)
     , m_width(width)
     , m_height(height)
+    , m_timeMin(timeMin)
+    , m_timeMax(timeMax)
 {
     vector3d tempH;
     auto direction = lookAt - origin;
@@ -73,7 +79,7 @@ ray camera::getRay(int u, int v)
     auto direction = m_bottomLeft 
     + ((u + randomDouble(-0.5, 0.5)) * m_horizontalIdentity) 
     + ((v + randomDouble(-0.5, 0.5)) * m_verticalIdentity) - m_origin;
-    return ray(m_origin, identityVector(direction));
+    return ray(m_origin, identityVector(direction), randomDouble(m_timeMin, m_timeMax));
 }
 
 std::vector<ray> camera::getRay()

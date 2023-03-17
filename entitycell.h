@@ -12,13 +12,15 @@ struct hitRecord
     double t;
     bool frontFace;
     std::shared_ptr<material> materialPtr;
+    double time;
     hitRecord() 
         : hitPoint(point3d(0.0, 0.0, 0.0))
         , hitDirection(vector3d(0.0, 0.0, 0.0))
         , normal(vector3d(0.0, 0.0, 0.0))
         , t(0.0)
         , frontFace(true) 
-        , materialPtr(nullptr) {}
+        , materialPtr(nullptr) 
+        , time(0.0) {}
     vector3d reflect() const
     {
         return hitDirection - 2 * dot(hitDirection, normal) * normal;

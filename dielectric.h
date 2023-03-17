@@ -25,9 +25,9 @@ bool dielectric::scatter(const hitRecord& record, color& attenuation, ray& scett
 {
     attenuation = m_albedo;
     if(record.frontFace){
-        scetterRay = ray(record.hitPoint, record.refract(1.0, m_refractIndex));
+        scetterRay = ray(record.hitPoint, record.refract(1.0, m_refractIndex), record.time);
     } else {
-        scetterRay = ray(record.hitPoint, record.refract(m_refractIndex, 1.0));
+        scetterRay = ray(record.hitPoint, record.refract(m_refractIndex, 1.0), record.time);
     }
     return true;
 }

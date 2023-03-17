@@ -4,7 +4,7 @@ image : creatImage
 	./creatImage 1>image.ppm 2>log
 
 creatImage : main.cpp $(headfiles)
-	g++ main.cpp -o creatImage
+	g++ -g main.cpp -o creatImage
 
 test : unitTest
 	./unitTest >>testLog 2>&1

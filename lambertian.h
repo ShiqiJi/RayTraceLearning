@@ -28,7 +28,7 @@ bool lambertain::scatter(const hitRecord& record, color& attenuation, ray& scett
     if(vector3d::isNullVector(direction)){
         direction = record.normal;
     }
-    scetterRay = ray(record.hitPoint, direction);
+    scetterRay = ray(record.hitPoint, direction, record.time);
     attenuation = m_albedo;
     return true;
 }
